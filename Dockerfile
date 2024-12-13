@@ -1,11 +1,10 @@
-#FROM alpine:latest as stage1
-FROM alpine:3.19 as stage1
+FROM alpine:latest as stage1
 
 WORKDIR /var
 
-#RUN apk update && \
-#    apk upgrade && \
-RUN apk add git python3 py3-pip
+RUN apk update && \
+    apk upgrade && \
+    apk add git python3 py3-pip
 
 
 COPY app /var/zadanie1/app
