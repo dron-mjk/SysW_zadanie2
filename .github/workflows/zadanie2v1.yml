@@ -36,7 +36,9 @@ jobs:
             uses: docker/metadata-action@v5
             with:
               images: ${{ vars.DOCKERHUB_USER  }}/${{ vars.IMAGE_NAME }}
-              flavour: latest=false           
+              flavour: latest=false     
+              labels:
+                org.opencontainers.image.source="https://github.com/${{ GITHUB_REPOSITORY }}     
               tags: |
                 type=semver,priority=200,pattern={{version}}
                 type=sha,priority=100,prefix=sha-,format=short         
