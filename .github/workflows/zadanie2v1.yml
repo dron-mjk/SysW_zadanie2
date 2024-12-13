@@ -53,6 +53,8 @@ jobs:
               file: ./Dockerfile
               tags: ${{ steps.meta.outputs.tags }}
               labels: ${{ steps.meta.outputs.labels }}
+              provenance: mode=max
+              sbom: true
               cache-from: type=registry,ref=${{ vars.DOCKERHUB_USER }}/${{ vars.IMAGE_NAME }}:cache
               cache-to: type=registry,ref=${{ vars.DOCKERHUB_USER }}/${{ vars.IMAGE_NAME }}:cache,mode=max
 
