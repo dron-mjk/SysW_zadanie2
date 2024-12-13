@@ -20,9 +20,9 @@ FROM alpine:latest
 
 COPY --from=stage1 /var/zadanie1 /var/zadanie1
 
-RUN apk update && \
-    apk upgrade && \
-    apk add python3 curl
+# RUN apk update && \
+    # apk upgrade && \
+RUN apk add python3 curl
 
 EXPOSE 5000
 
