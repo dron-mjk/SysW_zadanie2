@@ -69,9 +69,7 @@ jobs:
           
           - name: Check Terraform Plan
             if: ${{ steps.docker-scout.outputs.exitcode != 0 }}
-            run: |
-            echo "Docker scout returned ${{ steps.plan.outputs.exitcode }}"
-            exit ${{ steps.docker-scout.outputs.exitcode }}
+            run: echo "Docker scout returned ${{ steps.plan.outputs.exitcode }}" && exit ${{ steps.docker-scout.outputs.exitcode }}
 
           - name: 'Login to GitHub Container Registry'
             if: ${{ steps.docker-scout.outputs.exitcode == 0 }}
