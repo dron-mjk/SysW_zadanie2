@@ -1,10 +1,10 @@
 name: Docker Image CI
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v*'
 
 jobs:
 
@@ -13,6 +13,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+          # Authenticate to the container registry
+          - name: Authenticate to registry 
+            uses: docker/login-action@v3
+            with:
+              registry: docker.io
+              username: ${{ env.DOCKERHUB_USER }}
+              password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+          - name: Setup QEMU
+            uses: docker/setup-qemu-action@v3
+
+          - name: Setup Docker buildx
+            uses: docker/setup-buildx-action@v3
+
+          # Extract metadata (tags, labels) for Docker
+          - name: Extract Docker metadata
+            id: meta
+            uses: docker/metadata-action@v5
+            with:
+              images: docker.io/${{ env.IMAGE_NAME }}
+              labels: |
+                org.opencontainers.image.revision=${{ env.SHA }}            
+              tags: |
+                type=edge,branch=$repo.default_branch
+                type=semver,pattern=v{{version}}
+                type=sha,prefix=,suffix=,format=short            
+
+          # Build and push Docker image with Buildx
+          # (don't push on PR, load instead)
+          - name: Build and push Docker image
+            id: build-and-push
+            uses: docker/build-push-action@v6
+            with:
+              context: .
+              platforms: linux/amd64,linux/arm64
+              push: true
+              file: ./Dockerfile
+              tags: ${{ steps.meta.outputs.tags }}
+              labels: ${{ steps.meta.outputs.labels }}
+              cache-from: type=registry,ref=${{ env.DOCKERHUB_USER }}/${{ env.IMAGE_NAME }}:cache
+              cache-to: type=registry,ref=${{ env.DOCKERHUB_USER }}/${{ env.IMAGE_NAME }}:cache,mode=max
+
+
+          # Compare the image built in the pull request with the one in production
+          - name: Docker Scout
+            id: docker-scout
+            if: ${{ github.event_name == 'pull_request' }}
+            uses: docker/scout-action@v1
+            with:
+              command: compare
+              image: ${{ steps.meta.outputs.tags }}
+              to-env: production
+              ignore-unchanged: true
+              only-severities: critical,high
+              github-token: ${{ secrets.GH_TOKEN }}
