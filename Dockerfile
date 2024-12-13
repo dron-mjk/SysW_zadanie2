@@ -16,7 +16,7 @@ RUN python -m venv .venv
 RUN /var/zadanie1/app/.venv/bin/pip install -r requirements.txt
 
 
-FROM alpine:latest
+FROM alpine:3.19
 
 COPY --from=stage1 /var/zadanie1 /var/zadanie1
 
