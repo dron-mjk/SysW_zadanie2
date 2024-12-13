@@ -32,13 +32,11 @@ jobs:
             id: meta
             uses: docker/metadata-action@v5
             with:
-              images: docker.io/${{ env.IMAGE_NAME }}
-              labels: |
-                org.opencontainers.image.revision=${{ env.SHA }}            
+              images: ${{ env.DOCKERHUB_USER  }}/${{ env.IMAGE_NAME }}
+              flavour: latest=true           
               tags: |
-                type=edge,branch=$repo.default_branch
-                type=semver,pattern=v{{version}}
-                type=sha,prefix=,suffix=,format=short            
+                type=semver,priority=200,pattern={{version}}
+                type=sha,priority=100,prefix=sha-,format=short         
 
           # Build and push Docker image with Buildx
           # (don't push on PR, load instead)
